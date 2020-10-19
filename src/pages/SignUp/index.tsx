@@ -6,11 +6,15 @@ import {
   View,
   ScrollView,
   TextInput,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import { Form } from '@unform/mobile';
 import { FormHandles } from '@unform/core';
+import * as Yup from 'yup';
+
+import getValidationErrors from '../../utils/getValidationErrors';
 
 import * as S from './styles';
 
@@ -19,6 +23,12 @@ import logoImg from '../../assets/images/logo.png';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 
+interface SignUpFormData {
+  name: string;
+  email: string;
+  password: string;
+}
+
 const SignIn: React.FC = () => {
   const navigation = useNavigation();
 
@@ -26,8 +36,41 @@ const SignIn: React.FC = () => {
   const emailInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
 
-  const handleSignUp = useCallback(data => {
-    console.log(data);
+  const handleSubmit = useCallback(async (data: SignUpFormData) => {
+    if (formRef.current) {
+      try {
+        formRef.current.setErrors({});
+
+        const schema = Yup.object().shape({
+          name: Yup.string().required('Seu nome é obrigatório'),
+          email: Yup.string()
+            .email('Este e-mail é inválido')
+            .required('Seu e-mail é obrigatório'),
+          password: Yup.string().min(
+            6,
+            'Sua senha deve ter no mínimo 6 dígitos',
+          ),
+        });
+
+        await schema.validate(data, {
+          abortEarly: false,
+        });
+
+        // await api.post('/users', data);
+
+        // history.push('/');
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err);
+          formRef.current.setErrors(errors);
+        } else {
+          Alert.alert(
+            'Erro no cadastro',
+            'Ocorreu um erro ao fazer seu cadastro, tente novamente.',
+          );
+        }
+      }
+    }
   }, []);
 
   return (
@@ -50,7 +93,7 @@ const SignIn: React.FC = () => {
 
             <Form
               ref={formRef}
-              onSubmit={handleSignUp}
+              onSubmit={handleSubmit}
               style={{ width: '100%' }}
             >
               <Input

@@ -14,6 +14,8 @@ import { Form } from '@unform/mobile';
 import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
 
+import api from '../../services/api';
+
 import getValidationErrors from '../../utils/getValidationErrors';
 
 import * as S from './styles';
@@ -36,42 +38,50 @@ const SignIn: React.FC = () => {
   const emailInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
 
-  const handleSubmit = useCallback(async (data: SignUpFormData) => {
-    if (formRef.current) {
-      try {
-        formRef.current.setErrors({});
+  const handleSubmit = useCallback(
+    async (data: SignUpFormData) => {
+      if (formRef.current) {
+        try {
+          formRef.current.setErrors({});
 
-        const schema = Yup.object().shape({
-          name: Yup.string().required('Seu nome é obrigatório'),
-          email: Yup.string()
-            .email('Este e-mail é inválido')
-            .required('Seu e-mail é obrigatório'),
-          password: Yup.string().min(
-            6,
-            'Sua senha deve ter no mínimo 6 dígitos',
-          ),
-        });
+          const schema = Yup.object().shape({
+            name: Yup.string().required('Seu nome é obrigatório'),
+            email: Yup.string()
+              .email('Este e-mail é inválido')
+              .required('Seu e-mail é obrigatório'),
+            password: Yup.string().min(
+              6,
+              'Sua senha deve ter no mínimo 6 dígitos',
+            ),
+          });
 
-        await schema.validate(data, {
-          abortEarly: false,
-        });
+          await schema.validate(data, {
+            abortEarly: false,
+          });
 
-        // await api.post('/users', data);
-
-        // history.push('/');
-      } catch (err) {
-        if (err instanceof Yup.ValidationError) {
-          const errors = getValidationErrors(err);
-          formRef.current.setErrors(errors);
-        } else {
           Alert.alert(
-            'Erro no cadastro',
-            'Ocorreu um erro ao fazer seu cadastro, tente novamente.',
+            'Cadastro realizado com sucesso!',
+            'Agora você já pode fazer logon no GoBarber.',
           );
+
+          await api.post('/users', data);
+
+          navigation.navigate('SignIn');
+        } catch (err) {
+          if (err instanceof Yup.ValidationError) {
+            const errors = getValidationErrors(err);
+            formRef.current.setErrors(errors);
+          } else {
+            Alert.alert(
+              'Erro no cadastro',
+              'Ocorreu um erro ao fazer seu cadastro, tente novamente.',
+            );
+          }
         }
       }
-    }
-  }, []);
+    },
+    [navigation],
+  );
 
   return (
     <>

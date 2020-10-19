@@ -1,5 +1,12 @@
 import React from 'react';
-import { Image } from 'react-native';
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  View,
+  ScrollView,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/Feather';
 
 import * as S from './styles';
 
@@ -10,22 +17,54 @@ import Button from '../../components/Button';
 
 const SignIn: React.FC = () => {
   return (
-    <S.Container>
-      <Image source={logoImg} />
+    <>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        enabled
+      >
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ flex: 1 }}
+        >
+          <S.Container>
+            <Image source={logoImg} />
 
-      <S.Title>Faça seu logon</S.Title>
+            <View>
+              <S.Title>Faça seu logon</S.Title>
+            </View>
 
-      <Input name="email" icon="mail" placeholder="E-mail" />
-      <Input name="password" icon="lock" placeholder="Senha" />
+            <Input name="email" icon="mail" placeholder="E-mail" />
+            <Input name="password" icon="lock" placeholder="Senha" />
 
-      <Button
+            <Button
+              onPress={() => {
+                console.log('foi');
+              }}
+            >
+              Entrar
+            </Button>
+
+            <S.ForgotPasswordButton
+              onPress={() => {
+                console.log('foi');
+              }}
+            >
+              <S.ForgotPasswordText>Esqueci minha senha</S.ForgotPasswordText>
+            </S.ForgotPasswordButton>
+          </S.Container>
+        </ScrollView>
+      </KeyboardAvoidingView>
+
+      <S.CreateAccountButton
         onPress={() => {
           console.log('foi');
         }}
       >
-        Entrar
-      </Button>
-    </S.Container>
+        <Icon name="log-in" size={20} color="#ff9000" />
+        <S.CreateAccountText>Criar uma conta</S.CreateAccountText>
+      </S.CreateAccountButton>
+    </>
   );
 };
 
